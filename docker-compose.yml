@@ -1,41 +1,49 @@
-version: "3.9"
+version: "3.8"
 
 services:
+  traefik:
+    image: traefik:v2.10
+    container_name: traefik
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./traefik/traefik.yml:/traefik.yml
+      - ./traefik/letsencrypt:/letsencrypt
+    command: --configFile=/traefik.yml
+    networks:
+      - main-network
   app:
     build:
       context: .
-      args:
-        - DEV=true
-    ports:
-      - "8000:8000"
-    volumes:
-      - ./app:/app
-      - dev-static-data:/vol/web
-    command: >
-      sh -c "python manage.py wait_for_db &&
-             python manage.py migrate &&
-             python manage.py runserver 0.0.0.0:8000"
     environment:
-      - DB_HOST=db
-      - DB_NAME=devdb
-      - DB_USER=devuser
-      - DB_PASS=changeme
-      - DEBUG=1
-    depends_on:
-      db:
-        condition: service_healthy
-
+      - DEBUG=0
+      - DJANGO_SETTINGS_MODULE=config.settings.production
+    volumes:
+      - static-data:/app/static
+    networks:
+      - main-network
+    labels:  # TRAEFİK İÇİN KRİTİK!
+      - "traefik.enable=true"
+      - "traefik.http.routers.django-https.rule=Host(`superisi.net`) || Host(`www.superisi.net`)"
+      - "traefik.http.routers.django-https.entrypoints=websecure"
+      - "traefik.http.routers.django-https.tls.certresolver=letsencrypt"
+      - "traefik.http.services.django.loadbalancer.server.port=8000"  # Django portu
   db:
-    image: postgres:13-alpine
+    image: postgres:15
     volumes:
-      - dev-db-data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_DB=devdb
-      - POSTGRES_USER=devuser
-      - POSTGRES_PASSWORD=changeme
-    healthcheck:
-      test: ["CMD", "pg_isready", "-q", "-d", "devdb", "-U", "devuser"]
+      - postgres-data:/var/lib/postgresql/data
+    env_file:
+      - .envs/.db
+    networks:
+      - main-network
+
+# Ağ ve Volume tanımları
+networks:
+  main-network:
+    driver: bridge
 
 volumes:
-  dev-db-data:
-  dev-static-data:
+  postgres-data:
+  static-data:
