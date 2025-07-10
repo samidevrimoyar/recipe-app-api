@@ -15,8 +15,9 @@ services:
     networks:
       - main-network
   app:
-    build:
-      context: .
+    build: .
+    env_file:
+      - .envs/.django  # Django ortam değişkenleri
     environment:
       - DEBUG=0
       - DJANGO_SETTINGS_MODULE=config.settings.production

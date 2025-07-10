@@ -1,0 +1,5 @@
+DEBUG=0
+SECRET_KEY=UlaNaaneBuBeaaaAq-.
+DJANGO_ALLOWED_HOSTS=superisi.net,www.superisi.net
+DATABASE_URL=psql://devuser:changeme@db:5432/devdb
+CSRF_TRUSTED_ORIGINS=https://superisi.net,https://www.superisi.net
