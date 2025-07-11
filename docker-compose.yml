@@ -62,3 +62,7 @@ services:
 volumes:
   postgres-data:
   static-data:
+
+networks:
+  web:
+    external: false
