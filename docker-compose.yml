@@ -6,13 +6,13 @@ services:
     container_name: traefik
     restart: always
     command:
-      - --configFile=/etc/traefik/traefik.yml
+      - --configFile=/etc/traefik.yml
     ports:
       - "80:80"
       - "443:443"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./traefik.yml:/etc/traefik.yml:ro
       - ./acme.json:/acme.json
     networks:
       - web
