@@ -1,6 +1,6 @@
-FROM python:3.9-alpine3.13
-LABEL maintainer="superisi.net"
+FROM python:3.9-slim
 
+ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 COPY ./requirements.txt /tmp/requirements.txt
@@ -32,8 +32,10 @@ RUN python -m venv /py && \
     chmod -R 755 /vol && \
     chmod -R +x /scripts
 
+RUN python manage.py collectstatic --noinput
+
 ENV PATH="/scripts:/py/bin:$PATH"
 
 USER django-user
 
-CMD ["run.sh"]
+CMD ["/scripts/run.sh"]

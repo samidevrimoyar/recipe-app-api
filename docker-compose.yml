@@ -25,13 +25,12 @@ services:
     command: >
       sh -c "python app/manage.py wait_for_db &&
              python app/manage.py migrate &&
-             python app/manage.py runserver 0.0.0.0:8000"
+             python manage.py collectstatic --noinput &&
+             gunicorn app.wsgi:application --bind 0.0.0.0:8000"
     volumes:
-      - ./app:/app
       - static-data:/vol/web
-    ports:
-      - "8000:8000"
     environment:
+      - DEBUG=0
       - DB_HOST=db
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
@@ -58,7 +57,8 @@ services:
       - POSTGRES_DB=${DB_NAME}
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASS}
-
+    networks:
+      - web
 volumes:
   postgres-data:
   static-data:
